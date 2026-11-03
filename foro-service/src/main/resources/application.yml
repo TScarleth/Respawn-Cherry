@@ -1,0 +1,30 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: foro-service
+  datasource:
+    url: ${ORACLE_URL}
+    username: ${ORACLE_USERNAME}
+    password: ${ORACLE_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      data-source-properties:
+        oracle.net.tns_admin: ${ORACLE_WALLET_LOCATION:}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+        format_sql: true
+
+# Conexión Oracle (opcional, Wallet)
+oracle:
+  wallet-location: ${ORACLE_WALLET_LOCATION:}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}

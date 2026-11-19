@@ -26,6 +26,15 @@ class JwtServiceTest {
 
     @Test
     void secretCortoEsRechazado() {
-        assertThrows(IllegalArgumentException.class, () -> new JwtService("corto", 1000));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> new JwtService("corto", 1000));
+        assertEquals("JWT_SECRET debe tener al menos 32 bytes en UTF-8", exception.getMessage());
+    }
+
+    @Test
+    void secretVacioEsRechazadoPorSeparado() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> new JwtService(" ", 1000));
+        assertEquals("JWT_SECRET no está configurada", exception.getMessage());
     }
 }

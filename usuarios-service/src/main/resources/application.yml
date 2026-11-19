@@ -23,5 +23,13 @@ oracle:
   wallet-location: ${ORACLE_WALLET_LOCATION:}
 
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+respawncherry:
+  bootstrap:
+    admin:
+      enabled: ${BOOTSTRAP_ADMIN_ENABLED:false}
+      name: ${BOOTSTRAP_ADMIN_NAME:Respawn Cherry Admin}
+      correo: ${BOOTSTRAP_ADMIN_EMAIL:admin@respawncherry.local}
+      password: ${BOOTSTRAP_ADMIN_PASSWORD:}

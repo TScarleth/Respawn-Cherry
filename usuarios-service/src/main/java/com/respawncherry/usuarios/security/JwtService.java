@@ -19,9 +19,12 @@ public class JwtService {
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms:86400000}") long expirationMs) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalArgumentException("JWT_SECRET no está configurada");
+        }
         byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
-            throw new IllegalArgumentException("JWT_SECRET debe tener al menos 32 caracteres");
+            throw new IllegalArgumentException("JWT_SECRET debe tener al menos 32 bytes en UTF-8");
         }
         this.key = Keys.hmacShaKeyFor(bytes);
         this.expirationMs = expirationMs;

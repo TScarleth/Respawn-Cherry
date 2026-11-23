@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 import com.respawncherry.foro.entity.Publicacion;
 import com.respawncherry.foro.exception.AccesoDenegadoException;
 import com.respawncherry.foro.repository.CategoriaRepository;
+import com.respawncherry.foro.repository.PublicacionImagenRepository;
+import com.respawncherry.foro.repository.PublicacionLikeRepository;
 import com.respawncherry.foro.repository.PublicacionRepository;
 import com.respawncherry.foro.security.ForoPrincipal;
 import java.util.List;
@@ -21,14 +23,16 @@ class PublicacionServiceTest {
 
     private final PublicacionRepository publicacionRepository = mock(PublicacionRepository.class);
     private final CategoriaRepository categoriaRepository = mock(CategoriaRepository.class);
+    private final PublicacionLikeRepository likeRepository = mock(PublicacionLikeRepository.class);
+    private final PublicacionImagenRepository imagenRepository = mock(PublicacionImagenRepository.class);
     private final PublicacionService service =
-            new PublicacionService(publicacionRepository, categoriaRepository);
+            new PublicacionService(publicacionRepository, categoriaRepository, likeRepository, imagenRepository);
 
     @Test
     void filtraPorTituloYCategoria() {
         when(publicacionRepository.buscar("zelda", 3L)).thenReturn(List.of());
 
-        assertEquals(List.of(), service.listar(" zelda ", 3L));
+        assertEquals(List.of(), service.listar(" zelda ", 3L, null));
         verify(publicacionRepository).buscar("zelda", 3L);
     }
 

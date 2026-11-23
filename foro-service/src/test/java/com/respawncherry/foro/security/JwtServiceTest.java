@@ -35,6 +35,21 @@ class JwtServiceTest {
     }
 
     @Test
+    void aceptaLaMismaClaveAunqueTengaEspaciosAlrededor() {
+        JwtService conEspacios = new JwtService("  " + SECRET + "  ");
+        String token = Jwts.builder()
+                .subject("gamer@example.com")
+                .claim("userId", 42L)
+                .claim("rol", "USUARIO")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)))
+                .compact();
+
+        assertEquals(42L, conEspacios.validar(token).getId());
+    }
+
+    @Test
     void rechazaTokensConOtraFirma() {
         String token = Jwts.builder()
                 .subject("gamer@example.com")

@@ -20,6 +20,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.OracleDialect
         format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 9MB
 
 # Conexión Oracle (opcional, Wallet)
 oracle:

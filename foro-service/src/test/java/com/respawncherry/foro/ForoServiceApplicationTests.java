@@ -2,9 +2,13 @@ package com.respawncherry.foro;
 
 import com.respawncherry.foro.repository.CategoriaRepository;
 import com.respawncherry.foro.repository.ComentarioRepository;
+import com.respawncherry.foro.repository.DenunciaRepository;
+import com.respawncherry.foro.repository.PublicacionImagenRepository;
+import com.respawncherry.foro.repository.PublicacionLikeRepository;
 import com.respawncherry.foro.repository.PublicacionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -24,6 +28,18 @@ class ForoServiceApplicationTests {
 
     @MockitoBean
     private ComentarioRepository comentarioRepository;
+
+    @MockitoBean
+    private PublicacionLikeRepository publicacionLikeRepository;
+
+    @MockitoBean
+    private DenunciaRepository denunciaRepository;
+
+    @MockitoBean
+    private PublicacionImagenRepository publicacionImagenRepository;
+
+    @MockitoBean
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void contextLoads() {

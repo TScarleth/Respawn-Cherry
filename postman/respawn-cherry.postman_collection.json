@@ -1,0 +1,156 @@
+{
+  "info": {
+    "name": "Respawn Cherry",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Peticiones reales de usuarios-service (8081) y foro-service (8082). El token se guarda al iniciar sesión."
+  },
+  "variable": [
+    { "key": "usuarios", "value": "http://127.0.0.1:8081" },
+    { "key": "foro", "value": "http://127.0.0.1:8082" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Registro",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Cherry\",\n  \"correo\": \"cherry@respawn.com\",\n  \"password\": \"Cherry2026!\"\n}" },
+            "url": "{{usuarios}}/api/auth/registro"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": ["const body = pm.response.json();", "if (body.token) pm.collectionVariables.set('token', body.token);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"correo\": \"cherry@respawn.com\",\n  \"password\": \"Cherry2026!\"\n}" },
+            "url": "{{usuarios}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Recuperar contraseña",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"correo\": \"cherry@respawn.com\"\n}" },
+            "url": "{{usuarios}}/api/auth/recuperar"
+          }
+        },
+        {
+          "name": "Restablecer contraseña",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"\",\n  \"password\": \"Cherry2026!\"\n}" },
+            "url": "{{usuarios}}/api/auth/restablecer"
+          }
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{usuarios}}/api/usuarios"
+          }
+        },
+        {
+          "name": "Obtener usuario",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{usuarios}}/api/usuarios/1"
+          }
+        },
+        {
+          "name": "Actualizar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Cherry\"\n}" },
+            "url": "{{usuarios}}/api/usuarios/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Foro",
+      "item": [
+        {
+          "name": "Categorías",
+          "request": { "method": "GET", "url": "{{foro}}/api/categorias" }
+        },
+        {
+          "name": "Buscar publicaciones",
+          "request": { "method": "GET", "url": "{{foro}}/api/publicaciones?titulo=squad" }
+        },
+        {
+          "name": "Ver publicación",
+          "request": { "method": "GET", "url": "{{foro}}/api/publicaciones/1" }
+        },
+        {
+          "name": "Crear publicación",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Nueva partida\",\n  \"contenido\": \"Busco squad esta tarde.\",\n  \"categoriaId\": 1\n}" },
+            "url": "{{foro}}/api/publicaciones"
+          }
+        },
+        {
+          "name": "Comentarios de una publicación",
+          "request": { "method": "GET", "url": "{{foro}}/api/publicaciones/1/comentarios" }
+        },
+        {
+          "name": "Crear comentario",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"contenido\": \"Me sumo.\"\n}" },
+            "url": "{{foro}}/api/publicaciones/1/comentarios"
+          }
+        },
+        {
+          "name": "Eliminar publicación",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{foro}}/api/publicaciones/1"
+          }
+        },
+        {
+          "name": "Eliminar comentario",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{foro}}/api/comentarios/1"
+          }
+        },
+        {
+          "name": "Listar denuncias",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{foro}}/api/denuncias"
+          }
+        }
+      ]
+    }
+  ]
+}

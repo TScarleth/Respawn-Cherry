@@ -1,17 +1,14 @@
 server:
-  port: \${SERVER_PORT:8080}
+  port: 8080
 
 spring:
   application:
     name: ${artifactId}
   datasource:
-    url: \${ORACLE_URL:}
-    username: \${ORACLE_USERNAME:}
-    password: \${ORACLE_PASSWORD:}
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     hibernate:
       ddl-auto: none
 
 jwt:
-  secret: \${JWT_SECRET}
+  secret: cambiar-por-variable-de-entorno

@@ -18,6 +18,19 @@ spring:
         dialect: org.hibernate.dialect.OracleDialect
         format_sql: true
 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
 # Conexión Oracle (opcional, Wallet)
 oracle:
   wallet-location: ${ORACLE_WALLET_LOCATION:}
@@ -27,6 +40,9 @@ jwt:
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 respawncherry:
+  frontend-url: ${FRONTEND_URL:http://127.0.0.1:4200}
+  mail:
+    from: ${MAIL_FROM:${MAIL_USERNAME:}}
   bootstrap:
     admin:
       enabled: ${BOOTSTRAP_ADMIN_ENABLED:false}

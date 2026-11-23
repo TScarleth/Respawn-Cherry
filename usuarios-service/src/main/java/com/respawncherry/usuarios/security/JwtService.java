@@ -22,6 +22,7 @@ public class JwtService {
         if (secret == null || secret.isBlank()) {
             throw new IllegalArgumentException("JWT_SECRET no está configurada");
         }
+        secret = secret.trim();
         byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             throw new IllegalArgumentException("JWT_SECRET debe tener al menos 32 bytes en UTF-8");
@@ -54,6 +55,7 @@ public class JwtService {
     private Claims extraerClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)
+                .clockSkewSeconds(60)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

@@ -29,12 +29,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
+        if (header == null || !header.regionMatches(true, 0, "Bearer ", 0, 7)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = header.substring(7);
+        String token = header.substring(7).trim();
         try {
             if (jwtService.esValido(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 String correo = jwtService.extraerCorreo(token);

@@ -32,6 +32,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, ex.getMessage(), List.of());
     }
 
+    @ExceptionHandler(CorreoNoEnviadoException.class)
+    public ResponseEntity<ErrorResponse> correoNoEnviado(CorreoNoEnviadoException ex) {
+        return error(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), List.of());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> validacion(MethodArgumentNotValidException ex) {
         List<String> detalles = ex.getBindingResult().getFieldErrors().stream()

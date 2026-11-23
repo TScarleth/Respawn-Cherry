@@ -100,6 +100,14 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
+    @Transactional
+    public void cambiarPassword(String correo, String password) {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+        usuario.setPassword(passwordEncoder.encode(password));
+        usuarioRepository.save(usuario);
+    }
+
     @Transactional(readOnly = true)
     public Usuario buscarPorCorreo(String correo) {
         return usuarioRepository.findByCorreo(correo)

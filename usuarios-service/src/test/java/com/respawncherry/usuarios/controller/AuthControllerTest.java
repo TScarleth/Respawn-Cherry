@@ -14,6 +14,8 @@ import com.respawncherry.usuarios.dto.UsuarioResponse;
 import com.respawncherry.usuarios.entity.Rol;
 import com.respawncherry.usuarios.exception.GlobalExceptionHandler;
 import com.respawncherry.usuarios.service.AuthService;
+import com.respawncherry.usuarios.service.PasswordResetService;
+import com.respawncherry.usuarios.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +31,12 @@ class AuthControllerTest {
 
     @Mock
     private AuthService authService;
+
+    @Mock
+    private PasswordResetService passwordResetService;
+
+    @Mock
+    private UsuarioService usuarioService;
 
     @InjectMocks
     private AuthController authController;

@@ -19,6 +19,9 @@ class JwtServiceTest {
         usuario.setRol(Rol.ADMIN);
 
         String token = jwtService.generarToken(usuario);
+        JwtService conEspacios = new JwtService("  test-secret-respawn-cherry-32chars!  ", 3600000);
+
+        assertTrue(conEspacios.esValido(token));
 
         assertTrue(jwtService.esValido(token));
         assertEquals("cherry@respawn.com", jwtService.extraerCorreo(token));

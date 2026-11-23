@@ -1,6 +1,7 @@
 package com.respawncherry.usuarios.dto;
 
 import com.respawncherry.usuarios.entity.Rol;
+import com.respawncherry.usuarios.validation.ContrasenaSegura;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +20,7 @@ public class UsuarioRequest {
 
     @NotBlank
     @Size(min = 8, max = 72)
+    @ContrasenaSegura
     private String password;
 
     @NotNull

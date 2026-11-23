@@ -1,6 +1,7 @@
 package com.respawncherry.usuarios.dto;
 
 import com.respawncherry.usuarios.entity.Rol;
+import com.respawncherry.usuarios.validation.ContrasenaSegura;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
@@ -14,6 +15,7 @@ public class UsuarioUpdateRequest {
     private String correo;
 
     @Size(min = 8, max = 72)
+    @ContrasenaSegura
     private String password;
 
     private Rol rol;

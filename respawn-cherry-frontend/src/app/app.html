@@ -1,0 +1,71 @@
+@if (facade.currentUser(); as user) {
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" routerLink="/forum" aria-label="Respawn Cherry, foro">
+        <img class="brand-mark" src="logo-respawn.png?v=2" alt="">
+        <span class="brand-copy"><strong>respawn<span>cherry</span></strong><small class="brand-tag">community gaming for girls</small></span>
+      </a>
+      <nav class="top-nav" aria-label="Navegación principal">
+        <button class="nav-back" type="button" aria-label="Volver" (click)="goBack()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5" /></svg>
+        </button>
+        <a routerLink="/forum" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Foro</a>
+        <a routerLink="/categories" routerLinkActive="active">Categorías</a>
+        <a routerLink="/nosotras" routerLinkActive="active">Nosotr@s</a>
+        @if (user.role === 'ADMIN') {
+          <a routerLink="/admin" routerLinkActive="active">ADMINISTRADOR</a>
+        }
+      </nav>
+      <div class="top-actions">
+        <a class="nav-profile" routerLink="/profile" routerLinkActive="active" aria-label="Mi perfil">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.3 0-8 1.7-8 4v1.5h16V18c0-2.3-4.7-4-8-4z"/></svg>
+        </a>
+        <span class="online-indicator"><i></i> En línea</span>
+        <button class="icon-button logout-button" type="button" aria-label="Cerrar sesión" (click)="logout()" [disabled]="farewell()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <div class="side-label">ESPACIO PERSONAL</div>
+        <a routerLink="/forum" routerLinkActive="selected" [routerLinkActiveOptions]="{ exact: true }"><span class="side-icon">⌂</span> Inicio</a>
+        <a routerLink="/profile" routerLinkActive="selected"><span class="side-icon">◎</span> Mi perfil</a>
+        @if (user.role === 'ADMIN') {
+          <a routerLink="/admin" routerLinkActive="selected"><span class="side-icon">⌘</span> Administración</a>
+          <a routerLink="/denuncias" routerLinkActive="selected"><span class="side-icon">⚑</span> Denuncias</a>
+        }
+        <div class="side-label side-label-spaced">CATEGORÍAS</div>
+        @for (category of facade.categories(); track category.id) {
+          <a class="category-link" [routerLink]="['/forum']" [queryParams]="{ category: category.slug }" fragment="conversaciones">
+            <span class="category-dot" [style.background]="category.color"></span>{{ category.name }}
+          </a>
+        }
+        <div class="sidebar-card">
+          <strong>Tu próximo<br>respawn empieza aquí.</strong>
+          <span>Comparte, juega y encuentra tu squad.</span>
+        </div>
+        <div class="sidebar-user">
+          <span class="avatar">@if (user.photo) { <img [src]="user.photo" alt=""> } @else { {{ user.name.charAt(0).toUpperCase() }} }</span>
+          <span><strong>{{ user.name }}</strong><small>{{ user.role }}</small></span>
+          <span class="user-status"></span>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+} @else {
+  <router-outlet />
+}
+<footer class="site-footer" [class.site-footer-app]="!!facade.currentUser()">
+  <p class="footer-line">© 2026 Respawn Cherry · community gaming for girls.</p>
+</footer>
+@if (farewell()) {
+  <div class="farewell" [class.farewell-hide]="farewellHiding()" role="status">
+    <div class="farewell-card"><p>esperamos que vuelvas pronto <span>🍒♡</span></p></div>
+  </div>
+}

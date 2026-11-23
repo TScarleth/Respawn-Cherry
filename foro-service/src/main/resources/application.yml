@@ -25,7 +25,6 @@ spring:
       max-file-size: 2MB
       max-request-size: 9MB
 
-# Conexión Oracle (opcional, Wallet)
 oracle:
   wallet-location: ${ORACLE_WALLET_LOCATION:}
 

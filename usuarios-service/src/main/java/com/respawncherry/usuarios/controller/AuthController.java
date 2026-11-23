@@ -32,13 +32,11 @@ public class AuthController {
         this.usuarioService = usuarioService;
     }
 
-    // Registro
     @PostMapping("/registro")
     public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody RegistroRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registrar(request));
     }
 
-    // Login
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));

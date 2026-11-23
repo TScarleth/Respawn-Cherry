@@ -31,7 +31,6 @@ spring:
             enable: true
             required: true
 
-# Conexión Oracle (opcional, Wallet)
 oracle:
   wallet-location: ${ORACLE_WALLET_LOCATION:}
 

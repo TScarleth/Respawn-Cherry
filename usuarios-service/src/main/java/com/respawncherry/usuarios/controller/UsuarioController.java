@@ -38,7 +38,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.obtener(id, authentication));
     }
 
-    // Crear usuario
     @PostMapping
     public ResponseEntity<UsuarioResponse> crear(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.crear(request));

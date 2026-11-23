@@ -28,15 +28,13 @@ import { ReportDialog } from './report-dialog';
 
     <section>
       <div class="section-heading"><h2 class="jersey-title">sumérgete en<br>la comunidad</h2><a routerLink="/categories">Ver categorías →</a></div>
-      <div class="row g-2 category-grid">
+      <div class="category-grid">
         @for (category of facade.categories(); track category.id) {
-          <div class="col-12 col-md-6 col-xl">
           <a class="category-card" [routerLink]="['/forum']" [queryParams]="{ category: category.slug }">
             <span class="category-icon" [style.color]="category.color">{{ category.icon }}</span>
             <strong class="neon-title">{{ category.name }}</strong>
             <small>{{ countLabel(countFor(category.id), 'conversación', 'conversaciones') }}</small>
           </a>
-          </div>
         }
       </div>
     </section>

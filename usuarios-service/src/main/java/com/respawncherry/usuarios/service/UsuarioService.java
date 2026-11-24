@@ -36,6 +36,7 @@ public class UsuarioService {
         usuario.setCorreo(request.getCorreo());
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         usuario.setRol(Rol.USUARIO);
+        usuario.setVerificado(false);
         return UsuarioMapper.toResponse(usuarioRepository.save(usuario));
     }
 

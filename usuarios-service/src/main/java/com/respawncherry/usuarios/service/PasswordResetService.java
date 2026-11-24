@@ -3,7 +3,6 @@ package com.respawncherry.usuarios.service;
 import com.respawncherry.usuarios.entity.Usuario;
 import com.respawncherry.usuarios.exception.CorreoNoEnviadoException;
 import com.respawncherry.usuarios.exception.CredencialesInvalidasException;
-import com.respawncherry.usuarios.exception.RecursoNoEncontradoException;
 import com.respawncherry.usuarios.repository.UsuarioRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -12,6 +11,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,11 +47,14 @@ public class PasswordResetService {
     }
 
     public void enviarEnlace(String correo) {
-        if (username == null || username.isBlank()) {
-            throw new CorreoNoEnviadoException("El correo de Respawn Cherry todavía no está configurado");
+        Optional<Usuario> encontrado = usuarioRepository.findByCorreoIgnoreCase(correo.trim());
+        if (encontrado.isEmpty()) {
+            return;
         }
-        Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(correo.trim())
-                .orElseThrow(() -> new RecursoNoEncontradoException("No encontramos una cuenta con ese correo"));
+        if (username == null || username.isBlank()) {
+            throw new CorreoNoEnviadoException("El envío de correos no está configurado. Faltan MAIL_USERNAME y MAIL_PASSWORD.");
+        }
+        Usuario usuario = encontrado.get();
         String token = UUID.randomUUID().toString();
         Instant expira = Instant.now().plusMillis(VIGENCIA_MS);
         jdbc.update(
@@ -115,6 +118,16 @@ public class PasswordResetService {
         }
         if (valor instanceof Instant instant) {
             return instant;
+        }
+        if (valor != null) {
+            try {
+                Object convertido = valor.getClass().getMethod("timestampValue").invoke(valor);
+                if (convertido instanceof Timestamp marca) {
+                    return marca.toInstant();
+                }
+            } catch (ReflectiveOperationException ex) {
+                throw new CredencialesInvalidasException("El enlace no es válido o ya caducó");
+            }
         }
         throw new CredencialesInvalidasException("El enlace no es válido o ya caducó");
     }

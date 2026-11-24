@@ -16,15 +16,28 @@ public class AuthService {
     private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final VerificacionService verificacionService;
 
-    public AuthService(UsuarioService usuarioService, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(
+            UsuarioService usuarioService,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            VerificacionService verificacionService) {
         this.usuarioService = usuarioService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.verificacionService = verificacionService;
     }
 
     public UsuarioResponse registrar(RegistroRequest request) {
-        return usuarioService.registrar(request);
+        UsuarioResponse creado = usuarioService.registrar(request);
+        try {
+            verificacionService.enviar(creado.getCorreo());
+            return creado;
+        } catch (RuntimeException ex) {
+            usuarioService.eliminar(creado.getId());
+            throw ex;
+        }
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -37,6 +50,9 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
             throw new CredencialesInvalidasException("Correo o contraseña incorrectos");
+        }
+        if (!usuario.isVerificado()) {
+            throw new CredencialesInvalidasException("Confirma tu correo antes de iniciar sesión");
         }
 
         String token = jwtService.generarToken(usuario);

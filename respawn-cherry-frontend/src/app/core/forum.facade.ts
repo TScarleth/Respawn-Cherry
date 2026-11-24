@@ -136,12 +136,12 @@ export class ForumFacade {
     );
   }
 
-  register(nombre: string, correo: string, password: string): Observable<ForumUser> {
+  register(nombre: string, correo: string, password: string): Observable<void> {
     return this.http.post<UsuarioApi>(`${USERS_API}/api/auth/registro`, {
       nombre: nombre.trim(),
       correo: correo.trim(),
       password
-    }).pipe(switchMap(() => this.login(correo, password)));
+    }).pipe(map(() => undefined));
   }
 
   logout(): void {

@@ -7,6 +7,7 @@ export const routes: Routes = [
   { path: 'register', canActivate: [guestGuard], loadComponent: () => import('./pages/auth.page').then((m) => m.AuthPage) },
   { path: 'recover', canActivate: [guestGuard], loadComponent: () => import('./pages/auth.page').then((m) => m.AuthPage) },
   { path: 'restablecer', canActivate: [guestGuard], loadComponent: () => import('./pages/auth.page').then((m) => m.AuthPage) },
+  { path: 'verificar', canActivate: [guestGuard], loadComponent: () => import('./pages/auth.page').then((m) => m.AuthPage) },
   { path: 'forum', canActivate: [authGuard], loadComponent: () => import('./pages/forum.page').then((m) => m.ForumPage) },
   { path: 'categories', canActivate: [authGuard], loadComponent: () => import('./pages/categories.page').then((m) => m.CategoriesPage) },
   { path: 'nosotras', canActivate: [authGuard], loadComponent: () => import('./pages/about.page').then((m) => m.AboutPage) },

@@ -1,0 +1,139 @@
+package com.respawncherry.usuarios.service;
+
+import com.respawncherry.usuarios.entity.Usuario;
+import com.respawncherry.usuarios.exception.CorreoNoEnviadoException;
+import com.respawncherry.usuarios.exception.CredencialesInvalidasException;
+import com.respawncherry.usuarios.exception.RecursoNoEncontradoException;
+import com.respawncherry.usuarios.repository.UsuarioRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class VerificacionService {
+
+    private static final long VIGENCIA_MS = 24 * 60 * 60 * 1000L;
+
+    private final JavaMailSender mailSender;
+    private final UsuarioRepository usuarioRepository;
+    private final JdbcTemplate jdbc;
+    private final String username;
+    private final String from;
+    private final String frontendUrl;
+
+    public VerificacionService(
+            JavaMailSender mailSender,
+            UsuarioRepository usuarioRepository,
+            JdbcTemplate jdbc,
+            @Value("${spring.mail.username:}") String username,
+            @Value("${respawncherry.mail.from:}") String from,
+            @Value("${respawncherry.frontend-url:http://127.0.0.1:4200}") String frontendUrl) {
+        this.mailSender = mailSender;
+        this.usuarioRepository = usuarioRepository;
+        this.jdbc = jdbc;
+        this.username = username;
+        this.from = from == null || from.isBlank() ? username : from;
+        this.frontendUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+    }
+
+    public void enviar(String correo) {
+        if (username == null || username.isBlank()) {
+            throw new CorreoNoEnviadoException("El envío de correos no está configurado. Faltan MAIL_USERNAME y MAIL_PASSWORD.");
+        }
+        String token = UUID.randomUUID().toString();
+        Instant expira = Instant.now().plusMillis(VIGENCIA_MS);
+        jdbc.update(
+                "INSERT INTO VERIFICACION_ENLACES (TOKEN, CORREO, EXPIRA) VALUES (?, ?, ?)",
+                token,
+                correo,
+                Timestamp.from(expira));
+        String enlace = frontendUrl + "/verificar?token=" + token;
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setFrom(from);
+            helper.setTo(correo);
+            helper.setSubject("Verifica tu correo — Respawn Cherry");
+            helper.setText("""
+                    Hola,
+
+                    Confirma tu correo para entrar a Respawn Cherry:
+                    %s
+
+                    El enlace caduca en 24 horas. Si no creaste esta cuenta, puedes ignorar el mensaje.
+
+                    Respawn Cherry
+                    """.formatted(enlace));
+            mailSender.send(message);
+        } catch (MessagingException | RuntimeException ex) {
+            jdbc.update("DELETE FROM VERIFICACION_ENLACES WHERE TOKEN = ?", token);
+            throw new CorreoNoEnviadoException("No pudimos enviar el correo. Inténtalo de nuevo.");
+        }
+    }
+
+    @Transactional
+    public String confirmar(String token) {
+        if (token == null || token.isBlank()) {
+            throw new CredencialesInvalidasException("El enlace no es válido o ya caducó");
+        }
+        List<Map<String, Object>> filas = jdbc.queryForList(
+                "SELECT CORREO, EXPIRA FROM VERIFICACION_ENLACES WHERE TOKEN = ?",
+                token.trim());
+        if (filas.isEmpty()) {
+            throw new CredencialesInvalidasException("El enlace no es válido o ya caducó");
+        }
+        Map<String, Object> fila = filas.get(0);
+        jdbc.update("DELETE FROM VERIFICACION_ENLACES WHERE TOKEN = ?", token.trim());
+        Object expira = fila.get("EXPIRA");
+        if (expira == null) {
+            expira = fila.get("expira");
+        }
+        if (aInstant(expira).isBefore(Instant.now())) {
+            throw new CredencialesInvalidasException("El enlace no es válido o ya caducó");
+        }
+        Object correoValor = fila.get("CORREO");
+        if (correoValor == null) {
+            correoValor = fila.get("correo");
+        }
+        String correo = String.valueOf(correoValor);
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RecursoNoEncontradoException("No encontramos una cuenta con ese correo"));
+        usuario.setVerificado(true);
+        usuarioRepository.save(usuario);
+        return correo;
+    }
+
+    private static Instant aInstant(Object valor) {
+        if (valor instanceof Timestamp marca) {
+            return marca.toInstant();
+        }
+        if (valor instanceof OffsetDateTime fecha) {
+            return fecha.toInstant();
+        }
+        if (valor instanceof Instant instant) {
+            return instant;
+        }
+        if (valor != null) {
+            try {
+                Object convertido = valor.getClass().getMethod("timestampValue").invoke(valor);
+                if (convertido instanceof Timestamp marca) {
+                    return marca.toInstant();
+                }
+            } catch (ReflectiveOperationException ex) {
+                throw new CredencialesInvalidasException("El enlace no es válido o ya caducó");
+            }
+        }
+        throw new CredencialesInvalidasException("El enlace no es válido o ya caducó");
+    }
+}

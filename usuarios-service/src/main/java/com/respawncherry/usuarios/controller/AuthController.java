@@ -7,9 +7,11 @@ import com.respawncherry.usuarios.dto.RegistroRequest;
 import com.respawncherry.usuarios.dto.RestablecerContrasenaRequest;
 import com.respawncherry.usuarios.dto.RestablecerContrasenaResponse;
 import com.respawncherry.usuarios.dto.UsuarioResponse;
+import com.respawncherry.usuarios.dto.VerificarCorreoRequest;
 import com.respawncherry.usuarios.service.AuthService;
 import com.respawncherry.usuarios.service.PasswordResetService;
 import com.respawncherry.usuarios.service.UsuarioService;
+import com.respawncherry.usuarios.service.VerificacionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +27,17 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
     private final UsuarioService usuarioService;
+    private final VerificacionService verificacionService;
 
-    public AuthController(AuthService authService, PasswordResetService passwordResetService, UsuarioService usuarioService) {
+    public AuthController(
+            AuthService authService,
+            PasswordResetService passwordResetService,
+            UsuarioService usuarioService,
+            VerificacionService verificacionService) {
         this.authService = authService;
         this.passwordResetService = passwordResetService;
         this.usuarioService = usuarioService;
+        this.verificacionService = verificacionService;
     }
 
     @PostMapping("/registro")
@@ -40,6 +48,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/verificar")
+    public ResponseEntity<RestablecerContrasenaResponse> verificar(@Valid @RequestBody VerificarCorreoRequest request) {
+        return ResponseEntity.ok(new RestablecerContrasenaResponse(verificacionService.confirmar(request.getToken())));
     }
 
     @PostMapping("/recuperar")

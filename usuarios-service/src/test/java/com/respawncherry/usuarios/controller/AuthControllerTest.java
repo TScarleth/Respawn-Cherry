@@ -16,6 +16,7 @@ import com.respawncherry.usuarios.exception.GlobalExceptionHandler;
 import com.respawncherry.usuarios.service.AuthService;
 import com.respawncherry.usuarios.service.PasswordResetService;
 import com.respawncherry.usuarios.service.UsuarioService;
+import com.respawncherry.usuarios.service.VerificacionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,9 @@ class AuthControllerTest {
     @Mock
     private UsuarioService usuarioService;
 
+    @Mock
+    private VerificacionService verificacionService;
+
     @InjectMocks
     private AuthController authController;
 
@@ -56,7 +60,7 @@ class AuthControllerTest {
         RegistroRequest request = new RegistroRequest();
         request.setNombre("Cherry");
         request.setCorreo("cherry@respawn.com");
-        request.setPassword("secreto123");
+        request.setPassword("secreto123!");
 
         when(authService.registrar(any(RegistroRequest.class)))
                 .thenReturn(new UsuarioResponse(1L, "Cherry", "cherry@respawn.com", Rol.USUARIO));

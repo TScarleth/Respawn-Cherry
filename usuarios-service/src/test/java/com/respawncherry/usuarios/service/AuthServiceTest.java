@@ -26,6 +26,9 @@ class AuthServiceTest {
     @Mock
     private UsuarioService usuarioService;
 
+    @Mock
+    private VerificacionService verificacionService;
+
     private PasswordEncoder passwordEncoder;
     private JwtService jwtService;
     private AuthService authService;
@@ -34,7 +37,7 @@ class AuthServiceTest {
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
         jwtService = new JwtService("test-secret-respawn-cherry-32chars!", 3600000);
-        authService = new AuthService(usuarioService, passwordEncoder, jwtService);
+        authService = new AuthService(usuarioService, passwordEncoder, jwtService, verificacionService);
     }
 
     @Test
@@ -45,6 +48,7 @@ class AuthServiceTest {
         usuario.setCorreo("cherry@respawn.com");
         usuario.setPassword(passwordEncoder.encode("secreto123"));
         usuario.setRol(Rol.USUARIO);
+        usuario.setVerificado(true);
 
         when(usuarioService.buscarPorCorreo("cherry@respawn.com")).thenReturn(usuario);
 
@@ -76,6 +80,24 @@ class AuthServiceTest {
         request.setPassword("otraClave");
 
         assertThrows(CredencialesInvalidasException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void loginRechazaCorreoSinVerificar() {
+        Usuario usuario = new Usuario();
+        usuario.setCorreo("cherry@respawn.com");
+        usuario.setPassword(passwordEncoder.encode("secreto123"));
+        usuario.setRol(Rol.USUARIO);
+        usuario.setVerificado(false);
+        when(usuarioService.buscarPorCorreo("cherry@respawn.com")).thenReturn(usuario);
+
+        LoginRequest request = new LoginRequest();
+        request.setCorreo("cherry@respawn.com");
+        request.setPassword("secreto123");
+
+        CredencialesInvalidasException error = assertThrows(
+                CredencialesInvalidasException.class, () -> authService.login(request));
+        assertEquals("Confirma tu correo antes de iniciar sesión", error.getMessage());
     }
 
     @Test

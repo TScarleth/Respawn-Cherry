@@ -33,6 +33,9 @@ public class Usuario {
     @Column(nullable = false, length = 20)
     private Rol rol;
 
+    @Column(nullable = false)
+    private boolean verificado = true;
+
     public Long getId() {
         return id;
     }
@@ -72,5 +75,13 @@ public class Usuario {
 
     public void setRol(Rol rol) {
         this.rol = rol;
+    }
+
+    public boolean isVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(boolean verificado) {
+        this.verificado = verificado;
     }
 }

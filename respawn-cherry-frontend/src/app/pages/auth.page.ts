@@ -60,6 +60,13 @@ function matchingPasswords(control: AbstractControl): ValidationErrors | null {
               <button class="button button-primary auth-submit" type="submit">Crear cuenta <span>→</span></button>
             </form>
             <p class="auth-bottom">¿Ya tienes cuenta? <a class="text-link" routerLink="/login">Inicia sesión</a></p>
+          } @else if (mode() === 'verificar') {
+            <span class="eyebrow">TU ENLACE</span>
+            <h2>Verifica tu correo</h2>
+            <p>Estamos confirmando el enlace que te enviamos.</p>
+            @if (error) { <div class="form-error" role="alert">{{ error }}</div> }
+            @if (success) { <div class="form-success" role="status">{{ success }}</div> }
+            <p class="auth-bottom"><a class="text-link" routerLink="/login">Volver a iniciar sesión</a></p>
           } @else if (mode() === 'restablecer') {
             <span class="eyebrow">TU ENLACE</span>
             <h2>Elige una contraseña nueva</h2>
@@ -80,19 +87,19 @@ function matchingPasswords(control: AbstractControl): ValidationErrors | null {
             <form [formGroup]="recoverForm" (ngSubmit)="recover()">
               <div class="form-field"><label for="recover-email">Correo electrónico</label><input id="recover-email" type="email" formControlName="email" placeholder="tu@gmail.com" autocomplete="email" [class.invalid]="recoverForm.controls.email.touched && recoverForm.controls.email.invalid">@if (fieldError(recoverForm.controls.email); as message) { <small class="field-error">{{ message }}</small> }</div>
               @if (error) { <div class="form-error" role="alert">{{ error }}</div> }
-              <button class="button button-primary auth-submit" type="submit" [disabled]="sending">Enviar enlace</button>
+              <button class="button button-primary auth-submit" type="submit" [disabled]="sending">Enviar</button>
             </form>
             <p class="auth-bottom"><a class="text-link" routerLink="/login">Volver a iniciar sesión</a></p>
           }
         </div>
       </section>
     </div>
-    @if (recoverySent()) {
+    @if (recoverySent() || verificationSent()) {
       <div class="mail-modal" role="dialog" aria-modal="true" aria-labelledby="mail-title">
         <div class="mail-card">
           <div class="mail-hearts" aria-hidden="true"><span>♡</span><span>♡</span><span>♡</span></div>
           <img class="mail-cherry" src="logo-respawn.png?v=2" alt="">
-          <h2 id="mail-title">Hemos enviado la recuperación de tu contraseña, revisa tu bandeja de entrada!</h2>
+          <h2 id="mail-title">{{ recoverySent() ? '¡Solicitud enviada! Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña. Revisa tu bandeja de entrada.' : '¡Solicitud enviada! Revisa tu bandeja de entrada para verificar tu correo antes de iniciar sesión.' }}</h2>
           <button class="button button-primary" type="button" (click)="closeRecovery()">Listo</button>
         </div>
       </div>
@@ -109,6 +116,7 @@ export class AuthPage {
   readonly fieldError = fieldError;
   readonly mode = signal(this.readMode());
   readonly recoverySent = signal(false);
+  readonly verificationSent = signal(false);
   error = '';
   success = '';
   sending = false;
@@ -122,7 +130,10 @@ export class AuthPage {
       this.error = '';
       this.success = '';
       this.recoverySent.set(false);
+      this.verificationSent.set(false);
+      if (this.mode() === 'verificar') this.confirmEmail();
     });
+    if (this.mode() === 'verificar') this.confirmEmail();
   }
 
   private readMode(): string {
@@ -173,9 +184,33 @@ export class AuthPage {
     }
     const { name, email, password } = this.registerForm.getRawValue();
     this.facade.register(name, email, password).subscribe({
-      next: () => void this.router.navigateByUrl('/forum'),
+      next: () => {
+        this.registerForm.reset();
+        this.verificationSent.set(true);
+      },
       error: (err: HttpErrorResponse) => {
         this.error = apiErrorMessage(err, 'No se pudo crear la cuenta.');
+      }
+    });
+  }
+
+  confirmEmail(): void {
+    this.error = '';
+    this.success = '';
+    const token = this.route.snapshot.queryParamMap.get('token') ?? '';
+    if (!token.trim()) {
+      this.error = 'El enlace no es válido.';
+      return;
+    }
+    this.sending = true;
+    this.recovery.confirm(token.trim()).subscribe({
+      next: () => {
+        this.sending = false;
+        this.success = 'Tu correo quedó verificado. Ya puedes iniciar sesión.';
+      },
+      error: (err: HttpErrorResponse) => {
+        this.sending = false;
+        this.error = this.mailError(err);
       }
     });
   }
@@ -230,6 +265,7 @@ export class AuthPage {
 
   closeRecovery(): void {
     this.recoverySent.set(false);
+    this.verificationSent.set(false);
   }
 
   private mailError(err: HttpErrorResponse): string {

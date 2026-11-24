@@ -5,7 +5,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth.interceptor';
 
-const authPaths = ['/login', '/register', '/recover', '/restablecer'];
+const authPaths = ['/login', '/register', '/recover', '/restablecer', '/verificar'];
 let enterFromAuth = false;
 
 function isAuthUrl(url: string): boolean {

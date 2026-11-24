@@ -15,4 +15,8 @@ export class PasswordRecoveryService {
   reset(token: string, password: string): Observable<{ correo: string }> {
     return this.http.post<{ correo: string }>(`${API}/restablecer`, { token, password });
   }
+
+  confirm(token: string): Observable<{ correo: string }> {
+    return this.http.post<{ correo: string }>(`${API}/verificar`, { token });
+  }
 }
